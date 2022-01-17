@@ -1,3 +1,5 @@
+import { prettyPrintTree } from "./voronoi/tree-print.js"
+
 class MinHeap {
     constructor(array=[]) {
         this.size = array.length
@@ -83,4 +85,193 @@ class MinHeap {
     }
 }
 
+class Node {
+    constructor(val) {
+        // Connections for the tree
+        this.value = val;
+        this.parent = null;
+        this.left = null;
+        this.right = null;
+        this.isRed = true;
+
+        // Allows DLL traversal through data structure
+        this.next = null;
+        this.prev = null;
+    }
+}
+
+class RBT {
+    constructor(root = null) {
+        this.root = root;
+        this.root.isRed = false;
+    }
+
+    printTree() {
+        prettyPrintTree(this.root);
+    }
+
+    printDLL() {
+        let node = this.root;
+        while (node.left) node = node.left;
+
+        let out = ""
+        while (node) {
+            out += node.value
+            if (node.next) out += ", "
+            node = node.next;
+        }
+        console.log(out);
+    }
+    
+    /** Inserts node y before x (in an in-order traversal) */
+    insertBefore(x, y) {
+        // Managing tree connections
+        if (x.left) {
+            x.prev.right = y;
+            y.parent = x.prev;
+        } else {
+            x.left = y;
+            y.parent = x;
+        }
+
+        // Manage DLL connections
+        y.prev = x.prev;
+        if (y.prev) y.prev.next = y;
+        y.next = x;
+        x.prev = y;
+
+        // Balance the tree
+        this.insertFixup(y);
+    }
+
+    /** Inserts node y before x (in an in-order traversal) */
+    insertAfter(x, y) {
+        // Managing tree connections
+        if (x.right) {
+            x.next.left = y;
+            y.parent = x.next;
+        } else {
+            x.right = y;
+            y.parent = x;
+        }
+
+        // Manage DLL connections
+        y.next = x.next;
+        if (y.next) y.next.prev = y;
+        y.prev = x;
+        x.next = y;
+
+        // Balance the tree
+        this.insertFixup(y);
+    }
+
+    insertFixup(x) {
+        this.insertFixupA(x)
+        x = this.insertFixupB(x)
+        this.insertFixupC(x)
+        this.root.isRed = false;
+    }
+
+    insertFixupA(x) {
+        while (x.parent && x.parent.isRed) {
+
+            let uncle = RBT.getSibing(x.parent);
+            if (!uncle || !uncle.isRed) return;
+
+            x.parent.isRed = false;
+            uncle.isRed = false;
+
+            x = x.parent.parent;
+            x.isRed = true;
+            console.log("case a")
+        }
+        // return x;
+    }
+
+    insertFixupB(x) {
+        if (!x || x === this.root || !x.parent.isRed) return;
+
+        let parent = x.parent;
+        let grandParent = parent.parent;
+        if (x === parent.right && parent === grandParent.left) {
+            x = parent;
+            this.leftRotate(parent);
+            console.log("case right left")
+        } else if (x === parent.left && parent === grandParent.right) {
+            x = parent;
+            this.rightRotate(parent);
+            console.log("case left right")
+        }
+        return x;
+    }
+
+    insertFixupC(x) {
+        if (!x || x === this.root || !x.parent.isRed) return;
+        let parent = x.parent;
+        let grandParent = parent.parent;
+        if (x === parent.left && parent === grandParent.left) {
+            this.rightRotate(grandParent);
+            parent.isRed = false;
+            grandParent.isRed = true;
+            console.log("case left left")
+        } else if (x === parent.right && parent === grandParent.right) {
+            this.leftRotate(grandParent);
+            parent.isRed = false;
+            grandParent.isRed = true;
+            console.log("case right right")
+        }
+    }
+
+    leftRotate(x) {
+        let y = x.right;
+        let b = y.left;
+        this.swap(x, y);
+
+        x.right = b;
+        if (b) b.parent = x;
+
+        y.left = x;
+        x.parent = y;
+    }
+
+    rightRotate(x) {
+        let y = x.left;
+        let b = y.right;
+        this.swap(x, y);
+
+        x.left = b;
+        if (b) b.parent = x;
+
+        y.right = x;
+        x.parent = y;
+    }
+
+    swap(x, y) {
+        let parent = x.parent;
+
+        if (!parent) {
+            this.root = y;
+        } else if (x.parent.left === x) {
+            parent.left = y;
+        } else {
+            parent.right = y;
+        }
+
+        if (y) y.parent = parent;
+    }
+
+    static getSibing(x) {
+        return (x.parent.left === x) ? x.parent.right : x.parent.left;
+    }
+}
+
 export { MinHeap }
+
+let rootNode = new Node(6);
+let leftNode = new Node(5);
+let rightNode = new Node(4);
+let t = new RBT(rootNode);
+t.insertBefore(rootNode, leftNode);
+t.insertBefore(leftNode, rightNode);
+t.printTree();
+t.printDLL();
