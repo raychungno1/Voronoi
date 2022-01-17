@@ -1,0 +1,14 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+
+body {
+    margin: 0;
+    background:#101A26;
+    height: 100vh;
+}
+
+canvas {
+    background: rgba(0, 0, 0, 0.5);
+}
