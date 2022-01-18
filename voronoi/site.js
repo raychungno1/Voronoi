@@ -7,6 +7,10 @@ class Site {
         this.point = point;
         this.face = face;
     }
+
+    lessThan(a) {
+        return this.point.y < a.point.y;
+    }
 }
 
 export { Site };

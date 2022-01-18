@@ -9,9 +9,9 @@ class Event {
         }
     }
 
-    lessThan(a) {
-        y1 = this.isSiteEvent ? this.site.point.y : this.point.y;
-        y2 = a.isSiteEvent ? a.site.point.y : a.point.y;
-        return y1 < y2;
-    }
+    // lessThan(a) {
+    //     y1 = this.isSiteEvent ? this.site.point.y : this.point.y;
+    //     y2 = a.isSiteEvent ? a.site.point.y : a.point.y;
+    //     return y1 < y2;
+    // }
 }

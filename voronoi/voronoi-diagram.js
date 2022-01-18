@@ -58,20 +58,4 @@ class VoronoiDiagram {
     }
 }
 
-// let d = new VoronoiDiagram([
-//     new Vertex(1, 1),
-//     new Vertex(2, 2),
-//     new Vertex(3, 3),
-//     new Vertex(4, 4),
-// ]);
-// console.log(d);
-
-
-let a = [1, 1, 1]
-let b = [2, 2, 2]
-let c = [3, 3, 3]
-
-let arr = [a, b, c]
-console.log(arr)
-console.log(arr.filter(item => item !== b));
 export { VoronoiDiagram }
