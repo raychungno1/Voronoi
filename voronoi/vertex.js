@@ -1,3 +1,6 @@
+/**
+ * Represents the 2d coordinate system
+*/
 class Vertex {
     constructor(x, y) {
         this.x = x;

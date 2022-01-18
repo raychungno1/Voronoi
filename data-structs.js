@@ -1,5 +1,8 @@
 import { prettyPrintTree } from "./voronoi/tree-print.js"
 
+/**
+ * An array representation of a min-heap priority queue
+ */
 class MinHeap {
     constructor(array=[]) {
         this.size = array.length
@@ -85,25 +88,16 @@ class MinHeap {
     }
 }
 
-class Node {
-    constructor(val) {
-        // Connections for the tree
-        this.value = val;
-        this.parent = null;
-        this.left = null;
-        this.right = null;
-        this.isRed = true;
 
-        // Allows DLL traversal through data structure
-        this.next = null;
-        this.prev = null;
-    }
-}
-
+/**
+ * A self balancing binary tree that balances nodes with:
+ *      - reference to parent, left child, & right child
+ *      - reference to next & prev nodes of an in-order traversal
+ */
 class RBT {
     constructor(root = null) {
         this.root = root;
-        this.root.isRed = false;
+        if (this.root) this.root.isRed = false;
     }
 
     printTree() {
@@ -111,6 +105,8 @@ class RBT {
     }
 
     printDLL() {
+        if (!this.root) return; // exit if empty tree
+
         let node = this.root;
         while (node.left) node = node.left;
 
@@ -121,6 +117,11 @@ class RBT {
             node = node.next;
         }
         console.log(out);
+    }
+
+    setRoot(root) {
+        this.root = root;
+        this.root.isRed = false;
     }
     
     /** Inserts node y before x (in an in-order traversal) */
@@ -183,9 +184,8 @@ class RBT {
 
             x = x.parent.parent;
             x.isRed = true;
-            console.log("case a")
+            console.log("case a");
         }
-        // return x;
     }
 
     insertFixupB(x) {
@@ -196,11 +196,9 @@ class RBT {
         if (x === parent.right && parent === grandParent.left) {
             x = parent;
             this.leftRotate(parent);
-            console.log("case right left")
         } else if (x === parent.left && parent === grandParent.right) {
             x = parent;
             this.rightRotate(parent);
-            console.log("case left right")
         }
         return x;
     }
@@ -213,13 +211,126 @@ class RBT {
             this.rightRotate(grandParent);
             parent.isRed = false;
             grandParent.isRed = true;
-            console.log("case left left")
         } else if (x === parent.right && parent === grandParent.right) {
             this.leftRotate(grandParent);
             parent.isRed = false;
             grandParent.isRed = true;
-            console.log("case right right")
         }
+    }
+
+    remove(x) {
+        if (x === this.root && !(x.left || x.right)) {
+            this.root = null;
+            return;
+        }
+
+        let xIsRed = x.isRed;
+        let y;
+
+        // If node only has one child
+        if (!x.left) {
+            // parent = x.parent;
+            y = x.right;
+            this.swap(x, x.right);
+        } else if (!x.right) {
+            // parent = x.parent;
+            y = x.left;
+            this.swap(x, x.left);
+        }
+
+        // If both nodes are present
+        else {
+            let replacement = x.next;
+            y = replacement.right;
+            // parent = replacement;
+            xIsRed = replacement.isRed;
+
+            if (replacement != x.right) {
+                // parent = replacement.parent;
+                this.swap(replacement, replacement.right);
+
+                replacement.right = x.right;
+                replacement.right.parent = replacement;
+            }
+
+            this.swap(x, replacement);
+            replacement.left = x.left;
+            replacement.left.parent = replacement;
+            replacement.isRed = x.isRed;
+        }
+
+        // Balance the tree
+        if (!xIsRed) this.deleteFixup(y)
+
+        // Manage DDL Connections
+        if (x.prev) x.prev.next = x.next;
+        if (x.next) x.next.prev = x.prev;
+    }
+
+    deleteFixup(x) {
+        // While we havent reached the root & the node is black
+        let parent = x.parent;
+        while (x != this.root && !(x && x.isRed)) {
+            sibling = RBT.getSibling(x);
+
+            // If sibling is red
+            if (sibling.isRed) {
+                sibling.isRed = false;
+                parent.isRed = 1;
+
+                if (x === parent.left) {
+                    this.leftRotate(parent);
+                    sibling = parent.right;
+                } else {
+                    this.rightRotate(parent);
+                    sibling = parent.left;
+                }
+            }
+
+            // If both of the sibling's children are black
+            if (!(sibling.left && sibling.left.isRed) && !(sibling.right && sibling.left.isRed)) {
+                sibling.isRed = true;
+                x = parent;
+                parent = parent.parent;
+                continue;
+            }
+
+            // x is a left child
+            if (x === parent.left) {
+                // sibling's left child is red & right child is black
+                if (!(sibling.right && sibling.right.isRed)) {
+                    sibling.left.isRed = false;
+                    sibling.isRed = true;
+                    this.rightRotate(sibling);
+                    sibling = parent.right;
+                }
+                // sibling's right child is red
+                sibling.isRed = parent.isRed;
+                parent.isRed = false;
+                sibling.right.isRed = false;
+                this.leftRotate(parent);
+            }
+
+            // x is a right child
+            else {
+                // sibling's right child is red & left child is black
+                if (!(sibling.left && sibling.left.isRed)) {
+                    sibling.right.isRed = false;
+                    sibling.isRed = true;
+                    this.leftRotate(sibling);
+                    sibling = parent.left;
+                }
+                // sibling's left child is red
+                sibling.isRed = parent.isRed;
+                parent.isRed = false;
+                sibling.left.isRed = false;
+                this.rightRotate(parent);
+            }
+            x = this.root;
+        }
+
+        // set x to black
+        if (x) x.isRed = false;
     }
 
     leftRotate(x) {
@@ -265,13 +376,42 @@ class RBT {
     }
 }
 
-export { MinHeap }
+/**
+ * Dummy node class for testing the RBT
+ */
+class Node {
+    constructor(val) {
+        // Connections for the tree
+        this.value = val;
+        this.parent = null;
+        this.left = null;
+        this.right = null;
+        this.isRed = true;
 
-let rootNode = new Node(6);
-let leftNode = new Node(5);
-let rightNode = new Node(4);
-let t = new RBT(rootNode);
-t.insertBefore(rootNode, leftNode);
-t.insertBefore(leftNode, rightNode);
-t.printTree();
-t.printDLL();
+        // Allows DLL traversal through data structure
+        this.next = null;
+        this.prev = null;
+    }
+}
+
+export { MinHeap, RBT }
+
+// let rootNode = new Node(4);
+// let leftNode = new Node(5);
+// let rightNode = new Node(6);
+// let t = new RBT();
+// t.printTree();
+// t.setRoot(rootNode);
+// t.printTree();
+// t.insertAfter(rootNode, leftNode);
+// t.printTree();
+// t.insertAfter(leftNode, rightNode);
+// t.printTree();
+// t.remove(rightNode);
+// t.printTree();
+// t.remove(rootNode);
+// t.printTree();
+// // console.log(t)
+// t.remove(leftNode);
+// t.printTree();
+// t.printDLL();

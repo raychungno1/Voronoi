@@ -44,38 +44,3 @@ function printSpaces(tree, depth) {
 }
 
 export { prettyPrintTree };
-
-// let root = {
-//     value: 1,
-//     parent: null,
-//     left: null,
-//     right: null
-// }
-
-// let left = {
-//     value: 2,
-//     parent: root,
-//     left: null,
-//     right: null
-// }
-
-// let right = {
-//     value: 3,
-//     parent: root,
-//     left: null,
-//     right: null
-// }
-
-// root.left = left;
-// root.right = right;
-
-// let rightLeft = {
-//     value: 4,
-//     parent: right,
-//     left: null,
-//     right: null
-// }
-
-// right.left = rightLeft;
-
-// prettyPrintTree(root);
