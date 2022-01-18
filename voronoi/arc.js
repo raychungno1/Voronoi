@@ -3,15 +3,15 @@
  * Includes a doubly linked list for easy in-order traversal
  */
 class Arc {
-    constructor() {
+    constructor(site) {
         // Tree
         this.parent = null;
         this.left = null;
         this.right = null;
-        this.isRed = false;
+        this.isRed = true;
 
         // Diagram
-        this.site = null;
+        this.site = site;
         this.leftHalfEdge = null;
         this.rightHalfEdge = null;
         this.event = null;

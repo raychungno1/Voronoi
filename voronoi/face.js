@@ -3,9 +3,9 @@
  * Since the edges are also a circular linked list, only a single edge is needed to access all of them
 */
 class Face {
-    constructor() {
-        this.site = null;
-        this.edge = null;
+    constructor(site, edge = null) {
+        this.site = site;
+        this.edge = edge;
     }
 }
 

@@ -90,9 +90,7 @@ class MinHeap {
 
 
 /**
- * A self balancing binary tree that balances nodes with:
- *      - reference to parent, left child, & right child
- *      - reference to next & prev nodes of an in-order traversal
+ * A self balancing binary tree that balances the special Arc class
  */
 class RBT {
     constructor(root = null) {
@@ -119,9 +117,45 @@ class RBT {
         console.log(out);
     }
 
+    isEmpty() {
+        return this.root;
+    }
+
     setRoot(root) {
         this.root = root;
         this.root.isRed = false;
+    }
+
+    getLeftmostArc() {
+        if (!this.root) return; // exit if empty tree
+
+        let node = this.root;
+        while (node.left) node = node.left;
+        return node;
+    }
+
+    locateArcAbove(point, l) {
+        let node = this.root;
+        let found = false;
+
+        while (!found) {
+            let breakpointLeft = -Infinity;
+            let breakpointRight = Infinity;
+
+            if (node.prev) { // Compute the breakpoint between the current node & the previous
+                breakpointLeft = RBT.computeBreakpoint(node.prev.site.point, node.site.point, l);
+            }
+
+            if (node.next) { // Compute the breakpoint between the current node & the next
+                breakpointLeft = RBT.computeBreakpoint(node.site.point, node.next.site.point, l);
+            }
+
+            // Binary search for node based on the breakpoints
+            if (point.x < breakpointLeft) node = node.left;
+            else if (point.x > breakpointRight) node = node.right;
+            else found = true;
+        }
+        return node;
     }
     
     /** Inserts node y before x (in an in-order traversal) */
@@ -333,6 +367,23 @@ class RBT {
         if (x) x.isRed = false;
     }
 
+    replace(x, y) {
+        this.swap(x, y);
+        y.left = x.left;
+        y.right = x.right;
+
+        if (y.left) y.left.parent = y;
+        if (y.right) y.right.parent = y;
+
+        y.prev = x.prev;
+        y.next = x.next;
+
+        if (y.prev) y.prev.next = y;
+        if (y.next) y.next.prev = y;
+
+        y.isRed = x.isRed;
+    }
+
     leftRotate(x) {
         let y = x.right;
         let b = y.left;
@@ -374,6 +425,18 @@ class RBT {
     static getSibing(x) {
         return (x.parent.left === x) ? x.parent.right : x.parent.left;
     }
+
+    // Computes the breakpoint between two arcs (each arc is a point & a sweepLine)
+    static computeBreakPoint({x: x1, y: y1}, {x: x2, y: y2}, sweepLine) {
+        let l = sweepLine
+        let d1 = 1.0 / (2.0 * (y1 - l));
+        let d2 = 1.0 / (2.0 * (y2 - l));
+        let a = d1 - d2;
+        let b = 2.0 * (x2 * d2 - x1 * d1);
+        let c = (y1 * y1 + x1 * x1 - l * l) * d1 - (y2 * y2 + x2 * x2 - l * l) * d2;
+        let delta = b * b - 4.0 * a * c;
+        return (-b + Math.sqrt(delta)) / (2.0 * a);
+    }
 }
 
 /**
@@ -406,6 +469,8 @@ export { MinHeap, RBT }
 // t.insertAfter(rootNode, leftNode);
 // t.printTree();
 // t.insertAfter(leftNode, rightNode);
+// t.printTree();
+// t.replace(rootNode, new Node(7));
 // t.printTree();
 // t.remove(rightNode);
 // t.printTree();
