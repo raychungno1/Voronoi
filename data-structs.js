@@ -72,7 +72,6 @@ class MinHeap {
             // Swap the root with that smallest value (from above)
             if (index !== smallest) {
                 [arr[index], arr[smallest]] = [arr[smallest], arr[index]]
-                console.log("swap")
             } else {
                 done = true // If no swaps nessecary, we're done
             }
@@ -463,8 +462,12 @@ export { MinHeap, RBT }
 // let leftNode = new Node(5);
 // let rightNode = new Node(6);
 // let t = new RBT();
+// console.log(t.isEmpty())
 // t.printTree();
 // t.setRoot(rootNode);
+// console.log(t.isEmpty())
+// t.remove(rootNode);
+// console.log(t.isEmpty())
 // t.printTree();
 // t.insertAfter(rootNode, leftNode);
 // t.printTree();
