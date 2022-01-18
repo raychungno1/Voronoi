@@ -41,12 +41,13 @@ class FortuneAlgorithm {
             return;
         }
 
+        console.log("beachline is not empty")
         // Look for arc above the site
         let arcToBreak = this.beachLine.locateArcAbove(site.point, this.beachLineY);
         this.deleteEvent(arcToBreak);
 
         // Replace arc w/ 3 new arcs
-        let middleArc = breakArc(arcToBreak, site);
+        let middleArc = this.breakArc(arcToBreak, site);
         let leftArc = middleArc.prev;
         let rightArc = middleArc.next;
 

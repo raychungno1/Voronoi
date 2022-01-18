@@ -117,7 +117,7 @@ class RBT {
     }
 
     isEmpty() {
-        return this.root;
+        return !this.root;
     }
 
     setRoot(root) {
