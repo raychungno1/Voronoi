@@ -12,7 +12,7 @@ class Event {
     }
 
     lessThan(event) {
-        return this.y < event.y;
+        return this.y > event.y;
     }
 }
 

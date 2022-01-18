@@ -42,6 +42,7 @@ class VoronoiDiagram {
         let e = new HalfEdge();
         e.incidentFace = face;
         if (!face.edge) face.edge = e;
+        this.halfEdges.push(e);
         return e;
     }
 

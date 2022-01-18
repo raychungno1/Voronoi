@@ -18,7 +18,7 @@ class FortuneAlgorithm {
     construct() {
         // Initialize event queue
         this.events = new MinHeap(this.diagram.sites.map(site => new Event(true, site)));
-        console.log(this.events)
+
         // Process events
         while (this.events.size) {
             let event = this.events.remove();
@@ -66,7 +66,7 @@ class FortuneAlgorithm {
         let arc = event.arc;
 
         // Add vertex
-        let vertex = new Vertex(point.x, point.y);
+        let vertex = this.diagram.createVertex(point.x, point.y);
 
         // Delete events w/ this arc
         let leftArc = arc.prev;
@@ -100,8 +100,8 @@ class FortuneAlgorithm {
 
     removeArc(arc, vertex) {
         // End edges
-        setDestination(arc.prev, arc, vertex);
-        setDestination(arc, arc.next, vertex);
+        this.setDestination(arc.prev, arc, vertex);
+        this.setDestination(arc, arc.next, vertex);
 
         // Join the edges of the middle arc
         arc.leftHalfEdge.next = arc.rightHalfEdge;
@@ -113,10 +113,10 @@ class FortuneAlgorithm {
         // Create a new edge
         let prevHalfEdge = arc.prev.rightHalfEdge;
         let nextHalfEdge = arc.next.leftHalfEdge;
-        addEdge(arc.prev, arc.next);
-        setOrigin(arc.prev, arc.next, vertex);
-        setPrevHalfEdge(arc.prev.rightHalfEdge, prevHalfEdge);
-        setPrevHalfEdge(nextHalfEdge, arc.next.leftHalfEdge);
+        this.addEdge(arc.prev, arc.next);
+        this.setOrigin(arc.prev, arc.next, vertex);
+        this.setPrevHalfEdge(arc.prev.rightHalfEdge, prevHalfEdge);
+        this.setPrevHalfEdge(nextHalfEdge, arc.next.leftHalfEdge);
     }
 
     isMovingRight(left, right) {
@@ -130,11 +130,16 @@ class FortuneAlgorithm {
     addEdge(left, right) {
         // Create the half edges
         left.rightHalfEdge = this.diagram.createHalfEdge(left.site.face);
-        right.rightHalfEdge = this.diagram.createHalfEdge(right.site.face);
+        right.leftHalfEdge = this.diagram.createHalfEdge(right.site.face);
 
         // Set them as twins
         left.rightHalfEdge.twin = right.leftHalfEdge;
         right.leftHalfEdge.twin = left.rightHalfEdge;
+    }
+
+    setOrigin(left, right, vertex) {
+        left.rightHalfEdge.destination = vertex;
+        right.leftHalfEdge.origin = vertex;
     }
 
     setDestination(left, right, vertex) {
@@ -150,11 +155,11 @@ class FortuneAlgorithm {
     addEvent(left, middle, right) {
         let y = {value: null};
         let convergencePoint = FortuneAlgorithm.computeConvergencePoint(left.site.point, middle.site.point, right.site.point, y);
-        let isBelow = y.value <= mBeachlineY;
-        let leftBreakpointMovingRight = isMovingRight(left, middle);
-        let rightBreakpointMovingRight = isMovingRight(middle, right);
-        let leftInitialX = getInitialX(left, middle, leftBreakpointMovingRight);
-        let rightInitialX = getInitialX(middle, right, rightBreakpointMovingRight);
+        let isBelow = y.value <= this.beachLineY;
+        let leftBreakpointMovingRight = this.isMovingRight(left, middle);
+        let rightBreakpointMovingRight = this.isMovingRight(middle, right);
+        let leftInitialX = this.getInitialX(left, middle, leftBreakpointMovingRight);
+        let rightInitialX = this.getInitialX(middle, right, rightBreakpointMovingRight);
         let isValid =
             ((leftBreakpointMovingRight && leftInitialX < convergencePoint.x) ||
             (!leftBreakpointMovingRight && leftInitialX > convergencePoint.x)) &&
@@ -162,9 +167,9 @@ class FortuneAlgorithm {
             (!rightBreakpointMovingRight && rightInitialX > convergencePoint.x));
 
         if (isValid && isBelow) {
-            let event = (y.value, convergencePoint, middle);
+            let event = new Event(false, convergencePoint, middle, y.value);
             middle.event = event;
-            this.events.push(event);
+            this.events.insert(event);
         }
     }
 
@@ -177,11 +182,8 @@ class FortuneAlgorithm {
 
     static computeConvergencePoint(point1, point2, point3, y) {
         let v1 = point1.subtract(point2).ortho;
-        console.log(v1);
         let v2 = point2.subtract(point3).ortho;
-        console.log(v2);
         let delta = point3.subtract(point1).times(0.5);
-        console.log(delta);
         let t = delta.det(v2) / v1.det(v2);
         let center = point1.add(point2).times(0.5).add(v1.times(t));
         let r = Vertex.distance(center, point1);
@@ -201,11 +203,12 @@ class FortuneAlgorithm {
 let d = new FortuneAlgorithm([
     new Vertex(1, 1),
     new Vertex(2, 2),
-    new Vertex(4, 1),
+    new Vertex(4, 1.5),
     new Vertex(4, 4),
     new Vertex(0.5, 5),
 ]);
 d.construct();
+console.log(d.diagram);
 
 // console.log(FortuneAlgorithm.computeConvergencePoint(
 //     new Vertex(1, 1),

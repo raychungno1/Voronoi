@@ -150,8 +150,8 @@ class RBT {
             }
 
             // Binary search for node based on the breakpoints
-            if (point.x < breakpointLeft) node = node.left;
-            else if (point.x > breakpointRight) node = node.right;
+            if (point.x < breakpointLeft && node.left) node = node.left;
+            else if (point.x > breakpointRight && node.right) node = node.right;
             else found = true;
         }
         return node;
@@ -217,7 +217,6 @@ class RBT {
 
             x = x.parent.parent;
             x.isRed = true;
-            console.log("case a");
         }
     }
 
@@ -426,7 +425,7 @@ class RBT {
     }
 
     // Computes the breakpoint between two arcs (each arc is a point & a sweepLine)
-    static computeBreakPoint({x: x1, y: y1}, {x: x2, y: y2}, sweepLine) {
+    static computeBreakpoint({x: x1, y: y1}, {x: x2, y: y2}, sweepLine) {
         let l = sweepLine
         let d1 = 1.0 / (2.0 * (y1 - l));
         let d2 = 1.0 / (2.0 * (y2 - l));
