@@ -5,6 +5,7 @@
 class HalfEdge {
     constructor() {
         this.origin = null;
+        this.desgination = null;
         this.twin = null;
         this.incidentFace = null;
         this.prev = null;

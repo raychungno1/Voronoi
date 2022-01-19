@@ -192,11 +192,15 @@ class FortuneAlgorithm {
     }
 
     bound(box) {
-
-    }
-
-    getDiagram() {
-
+        // Make sure the bounding box contains all the vertices
+        for (let vertex of this.diagram.vertices) {
+            box.left = Math.min(vertex.point.x, box.left);
+            box.bottom = Math.min(vertex.point.y, box.bottom);
+            box.right = Math.max(vertex.point.x, box.right);
+            box.top = Math.max(vertex.point.y, box.top);
+        }
+        let linkedVerticies = [];
+        let vertices = []
     }
 }
 
@@ -206,9 +210,10 @@ let d = new FortuneAlgorithm([
     new Vertex(4, 1.5),
     new Vertex(4, 4),
     new Vertex(0.5, 5),
+    new Vertex(2.5, 3.5),
 ]);
 d.construct();
-console.log(d.diagram);
+console.log(d);
 
 // console.log(FortuneAlgorithm.computeConvergencePoint(
 //     new Vertex(1, 1),
