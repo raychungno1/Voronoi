@@ -41,7 +41,6 @@ class FortuneAlgorithm {
             return;
         }
 
-        console.log("beachline is not empty")
         // Look for arc above the site
         let arcToBreak = this.beachLine.locateArcAbove(site.point, this.beachLineY);
         this.deleteEvent(arcToBreak);
@@ -153,9 +152,11 @@ class FortuneAlgorithm {
     }
 
     addEvent(left, middle, right) {
+        console.log("adding event")
         let y = {value: null};
         let convergencePoint = FortuneAlgorithm.computeConvergencePoint(left.site.point, middle.site.point, right.site.point, y);
         let isBelow = y.value <= this.beachLineY;
+        console.log(isBelow)
         let leftBreakpointMovingRight = this.isMovingRight(left, middle);
         let rightBreakpointMovingRight = this.isMovingRight(middle, right);
         let leftInitialX = this.getInitialX(left, middle, leftBreakpointMovingRight);
@@ -165,7 +166,7 @@ class FortuneAlgorithm {
             (!leftBreakpointMovingRight && leftInitialX > convergencePoint.x)) &&
             ((rightBreakpointMovingRight && rightInitialX < convergencePoint.x) ||
             (!rightBreakpointMovingRight && rightInitialX > convergencePoint.x));
-
+        console.log(isValid)
         if (isValid && isBelow) {
             let event = new Event(false, convergencePoint, middle, y.value);
             middle.event = event;
