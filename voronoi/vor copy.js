@@ -2,7 +2,7 @@ import { Point } from "./point.js";
 import { Arc } from "./arc.js"
 import { Edge } from "./edge.js"
 import { Event } from "./event.js"
-import { MinHeap, RBT } from "../data-structs.js"
+import { MinHeap } from "../data-structs.js"
 
 class VoronoiDiagram {
 	/**
@@ -20,8 +20,7 @@ class VoronoiDiagram {
 
 	reset() {
 		this.event_list = null;
-		// this.beachline_root = null;
-		this.beachline = new RBT();
+		this.beachline_root = null;
 		this.voronoi_vertex = [];
 		this.edges = [];
 	}
@@ -49,32 +48,37 @@ class VoronoiDiagram {
 	 * @param {Point} p - a point object that must have coordinates p.x and p.y
 	 */
 	point_event(p) {
-		if (this.beachline.isEmpty()) {
-			this.beachline.setRoot(new Arc(p, null, null));
-			return;
+		let q = this.beachline_root;
+		if (q == null) this.beachline_root = new Arc(null, null, p, null, null);
+		else {
+			while (
+				q.right != null &&
+				this.parabola_intersection(p.y, q.focus, q.right.focus) <= p.x
+			) {
+				q = q.right;
+			}
+
+			// if(q === this.beachline_root && q.focus.y == p.y) xx = (q.focus.x + p.x)/2 // edge case when the two top sites have same y
+			let e_qp = new Edge(q.focus, p, p.x);
+			let e_pq = new Edge(p, q.focus, p.x);
+
+			let arc_p = new Arc(q, null, p, e_qp, e_pq);
+			let arc_qr = new Arc(arc_p, q.right, q.focus, e_pq, q.edge.right);
+			if (q.right) q.right.left = arc_qr;
+			arc_p.right = arc_qr;
+			q.right = arc_p;
+			q.edge.right = e_qp;
+
+			// Disable old event
+			if (q.event) q.event.active = false;
+
+			// Check edges intersection
+			this.add_circle_event(p, q);
+			this.add_circle_event(p, arc_qr);
+
+			this.edges.push(e_qp);
+			this.edges.push(e_pq);
 		}
-
-		let q = this.beachline.locateArcAbove(p, p.y)
-
-		// if(q === this.beachline_root && q.focus.y == p.y) xx = (q.focus.x + p.x)/2 // edge case when the two top sites have same y
-		let e_qp = new Edge(q.focus, p, p.x);
-		let e_pq = new Edge(p, q.focus, p.x);
-
-		let arc_p = new Arc(p, e_qp, e_pq);
-		let arc_qr = new Arc(q.focus, e_pq, q.edge.right);
-		this.beachline.insertAfter(q, arc_p);
-		this.beachline.insertAfter(arc_p, arc_qr);
-		q.edge.right = e_qp;
-
-		// Disable old event
-		if (q.event) q.event.active = false;
-
-		// Check edges intersection
-		this.add_circle_event(p, q);
-		this.add_circle_event(p, arc_qr);
-
-		this.edges.push(e_qp);
-		this.edges.push(e_pq);
 	}
 
 	/**
@@ -84,24 +88,25 @@ class VoronoiDiagram {
 	circle_event(e) {
 		let arc = e.caller;
 		let p = e.position;
-		let edge_new = new Edge(arc.prev.focus, arc.next.focus);
+		let edge_new = new Edge(arc.left.focus, arc.right.focus);
 
 		// Disable events
-		if (arc.prev.event) arc.prev.event.active = false;
-		if (arc.next.event) arc.next.event.active = false;
+		if (arc.left.event) arc.left.event.active = false;
+		if (arc.right.event) arc.right.event.active = false;
 
 		// Adjust beachline deleting the shrinking arc
-		arc.prev.edge.right = edge_new;
-		arc.next.edge.left = edge_new;
-		this.beachline.remove(arc);
+		arc.left.edge.right = edge_new;
+		arc.right.edge.left = edge_new;
+		arc.left.right = arc.right;
+		arc.right.left = arc.left;
 
 		this.edges.push(edge_new);
 
 		if (!this.point_outside(e.vertex)) this.voronoi_vertex.push(e.vertex); // Only add the vertex if inside canvas
 		arc.edge.left.end = arc.edge.right.end = edge_new.start = e.vertex; // This needs to come before add_circle_event as it is used there
 
-		this.add_circle_event(p, arc.prev);
-		this.add_circle_event(p, arc.next);
+		this.add_circle_event(p, arc.left);
+		this.add_circle_event(p, arc.right);
 	}
 
 	/**
@@ -110,10 +115,10 @@ class VoronoiDiagram {
 	 * @param {Arc} arc - The Arc tested
 	 */
 	add_circle_event(p, arc) {
-		if (arc.prev && arc.next) {
-			let a = arc.prev.focus;
+		if (arc.left && arc.right) {
+			let a = arc.left.focus;
 			let b = arc.focus;
-			let c = arc.next.focus;
+			let c = arc.right.focus;
 
 			//Compute sine of angle between focuses. if positive then edges intersect
 			if ((b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y) > 0) {
@@ -149,15 +154,16 @@ class VoronoiDiagram {
 	 * @param {Point} f2 - Focus of second parabola
 	 * @returns	{float} Intersection x-coordinate
 	 */
-	parabola_intersection(y, p1, p2) {
-		let dy = p1.y - p2.y;
-		if (dy === 0) return (p1.x + p2.x) / 2;
-		let dx = p1.x - p2.x;
-		let p1Dist = p1.y - y; //Difference btw parabola 1 fy and directrix
-		let p2Dist = p2.y - y; //Difference btw parabola 2 fy and directrix
+	parabola_intersection(y, f1, f2) {
+		let fyDiff = f1.y - f2.y;
+		if (fyDiff == 0) return (f1.x + f2.x) / 2;
+		let fxDiff = f1.x - f2.x;
+		let b1md = f1.y - y; //Difference btw parabola 1 fy and directrix
+		let b2md = f2.y - y; //Difference btw parabola 2 fy and directrix
+		let h1 = (-f1.x * b2md + f2.x * b1md) / fyDiff;
+		let h2 = Math.sqrt(b1md * b2md * (fxDiff ** 2 + fyDiff ** 2)) / fyDiff;
 
-		let numerator = (p2.x * p1Dist - p1.x * p2Dist) + Math.sqrt(p1Dist * p2Dist * (dx ** 2 + dy ** 2));
-		return numerator / dy;
+		return h1 + h2; //Returning the left x coord of intersection. Remember top of canvas is 0 hence parabolas are facing down
 	}
 
 	/**
@@ -184,15 +190,15 @@ class VoronoiDiagram {
 	 * @param {Point} last - last point extracted from the queue
 	 */
 	complete_segments(last) {
-		let r = this.beachline.root;
+		let r = this.beachline_root;
 		let e, x, y;
 		// Complete edges attached to beachline
 		while (r.right) {
 			e = r.edge.right;
-			x = RBT.computeBreakpoint(
+			x = this.parabola_intersection(
 				last.y * 1.1,
-				e.arc.prev,
-				e.arc.next
+				e.arc.left,
+				e.arc.right
 			); // Check parabola intersection assuming sweepline position equal to last event increased by 10%
 			y = e.getY(x);
 

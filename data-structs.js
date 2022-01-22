@@ -142,11 +142,11 @@ class RBT {
             let breakpointRight = Infinity;
 
             if (node.prev) { // Compute the breakpoint between the current node & the previous
-                breakpointLeft = RBT.computeBreakpoint(node.prev.site.point, node.site.point, l);
+                breakpointLeft = RBT.computeBreakpoint(l, node.prev.focus, node.focus);
             }
 
             if (node.next) { // Compute the breakpoint between the current node & the next
-                breakpointLeft = RBT.computeBreakpoint(node.site.point, node.next.site.point, l);
+                breakpointLeft = RBT.computeBreakpoint(l, node.focus, node.next.focus);
             }
 
             // Binary search for node based on the breakpoints
@@ -155,6 +155,36 @@ class RBT {
             else found = true;
         }
         return node;
+    }
+
+    insert(value) {
+        let parent = null;
+        let root = this.root;
+        while (root != null) {
+            parent = root; /* update parent & root node */
+            root = (root.value > value) ? root.left : root.right;
+        }
+
+        let node = new Node(value);
+        node.parent = parent;
+
+        if (!parent) {
+            this.root = node;
+        } else if (value < parent.value) {
+            parent.left = node;
+            node.prev = parent.prev;
+            if (node.prev) node.prev.next = node;
+            node.next = parent;
+            parent.prev = node;
+        } else {
+            parent.right = node;
+            node.next = parent.next;
+            if (node.next) node.next.prev = node;
+            node.prev = parent;
+            parent.next = node;
+        }
+
+        this.insertFixup(node);
     }
     
     /** Inserts node y before x (in an in-order traversal) */
@@ -200,7 +230,7 @@ class RBT {
     }
 
     insertFixup(x) {
-        this.insertFixupA(x)
+        x = this.insertFixupA(x)
         x = this.insertFixupB(x)
         this.insertFixupC(x)
         this.root.isRed = false;
@@ -208,9 +238,8 @@ class RBT {
 
     insertFixupA(x) {
         while (x.parent && x.parent.isRed) {
-
-            let uncle = RBT.getSibing(x.parent);
-            if (!uncle || !uncle.isRed) return;
+            let uncle = RBT.getSibling(x.parent);
+            if (!uncle || !uncle.isRed) return x;
 
             x.parent.isRed = false;
             uncle.isRed = false;
@@ -218,6 +247,7 @@ class RBT {
             x = x.parent.parent;
             x.isRed = true;
         }
+        return x;
     }
 
     insertFixupB(x) {
@@ -256,16 +286,24 @@ class RBT {
             return;
         }
 
+        // TESTING
+        // let val = x;
+        // x = this.root;
+        // while (x && val != x.value) {
+        //     x = (val < x.value) ? x.left : x.right;
+        // }
+        // if (!x) return;
+
         let xIsRed = x.isRed;
-        let y;
+        let y, parent;
 
         // If node only has one child
         if (!x.left) {
-            // parent = x.parent;
+            parent = x.parent;
             y = x.right;
             this.swap(x, x.right);
         } else if (!x.right) {
-            // parent = x.parent;
+            parent = x.parent;
             y = x.left;
             this.swap(x, x.left);
         }
@@ -274,11 +312,11 @@ class RBT {
         else {
             let replacement = x.next;
             y = replacement.right;
-            // parent = replacement;
+            parent = replacement;
             xIsRed = replacement.isRed;
 
             if (replacement != x.right) {
-                // parent = replacement.parent;
+                parent = replacement.parent;
                 this.swap(replacement, replacement.right);
 
                 replacement.right = x.right;
@@ -292,18 +330,18 @@ class RBT {
         }
 
         // Balance the tree
-        if (!xIsRed) this.deleteFixup(y)
+        if (!xIsRed) this.deleteFixup(y, parent);
 
         // Manage DDL Connections
         if (x.prev) x.prev.next = x.next;
         if (x.next) x.next.prev = x.prev;
     }
 
-    deleteFixup(x) {
+    deleteFixup(x, parent) {
         // While we havent reached the root & the node is black
-        let parent = x.parent;
         while (x != this.root && !(x && x.isRed)) {
-            sibling = RBT.getSibling(x);
+            // sibling = RBT.getSibling(x);
+            let sibling = (x === parent.left) ? parent.right : parent.left;
 
             // If sibling is red
             if (sibling.isRed) {
@@ -320,7 +358,7 @@ class RBT {
             }
 
             // If both of the sibling's children are black
-            if (!(sibling.left && sibling.left.isRed) && !(sibling.right && sibling.left.isRed)) {
+            if ((!sibling.left || !sibling.left.isRed) && (!sibling.right || !sibling.right.isRed)) {
                 sibling.isRed = true;
                 x = parent;
                 parent = parent.parent;
@@ -420,21 +458,21 @@ class RBT {
         if (y) y.parent = parent;
     }
 
-    static getSibing(x) {
+    static getSibling(x) {
         return (x.parent.left === x) ? x.parent.right : x.parent.left;
     }
 
     // Computes the breakpoint between two arcs (each arc is a point & a sweepLine)
-    static computeBreakpoint({x: x1, y: y1}, {x: x2, y: y2}, sweepLine) {
-        let l = sweepLine
-        let d1 = 1.0 / (2.0 * (y1 - l));
-        let d2 = 1.0 / (2.0 * (y2 - l));
-        let a = d1 - d2;
-        let b = 2.0 * (x2 * d2 - x1 * d1);
-        let c = (y1 * y1 + x1 * x1 - l * l) * d1 - (y2 * y2 + x2 * x2 - l * l) * d2;
-        let delta = b * b - 4.0 * a * c;
-        return (-b + Math.sqrt(delta)) / (2.0 * a);
-    }
+    static computeBreakpoint(y, p1, p2) {
+		let dy = p1.y - p2.y;
+		if (dy === 0) return (p1.x + p2.x) / 2;
+		let dx = p1.x - p2.x;
+		let p1Dist = p1.y - y; //Difference btw parabola 1 fy and directrix
+		let p2Dist = p2.y - y; //Difference btw parabola 2 fy and directrix
+
+		let numerator = (p2.x * p1Dist - p1.x * p2Dist) + Math.sqrt(p1Dist * p2Dist * (dx ** 2 + dy ** 2));
+		return numerator / dy;
+	}
 }
 
 /**
@@ -455,31 +493,23 @@ class Node {
     }
 }
 
-export { MinHeap }
+export { MinHeap, RBT }
 
-let leftNode = new Node(4);
-let rootNode = new Node(7);
-let rightNode = new Node(11);
-let leftLeft = new Node(2);
-let leftRight = new Node(6);
-let leftX3 = new Node (1);
-let t = new RBT();
-t.printTree();
-t.setRoot(leftNode);
-t.insertAfter(leftNode, rootNode);
-t.insertAfter(rootNode, rightNode);
-t.printTree();
-t.insertBefore(leftNode, leftLeft);
-t.insertAfter(leftNode, leftRight);
-t.printTree();
-t.insertAfter(leftLeft, leftX3);
-t.printTree();
-t.printDLL();
-// t.remove(rightNode);
-// t.printTree();
-// t.remove(rootNode);
-// t.printTree();
-// // console.log(t)
-// t.remove(leftNode);
+// let t = new RBT();
+// let arr = [];
+// for (let i = 20; i > 0; i--) {
+//     let val = Math.floor(Math.random() * 10)
+//     t.insert(val);
+//     arr.push(val);
+// }
 // t.printTree();
 // t.printDLL();
+// console.log(arr);
+// while (arr.length > 0) {
+//     let index = Math.floor(Math.random() * arr.length);
+//     t.remove(arr[index]);
+//     arr.splice(index, 1);
+//     t.printDLL();
+// }
+// console.log(t.isEmpty())
+// console.log(arr)

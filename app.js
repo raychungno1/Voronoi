@@ -36,7 +36,7 @@ window.addEventListener("mousemove", function(event) {
 
 function init(points, width, height) {
     let radius = 3;
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 100; i++) {
         let x = (Math.random() * (width - 2*radius)) + radius;
         let y = (Math.random() * (height - (2*radius))) + radius;
         points.push(new Point(x, y));

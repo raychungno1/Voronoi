@@ -7,7 +7,9 @@ function prettyPrintTree(tree, depth = 0) {
     let out = printSpaces(tree, depth);
     if (tree.parent) out += tree.parent.left === tree ? ",-" : "`-";
     else out += " -";
-    console.log(out + `[${tree.value}]`);
+    
+	if (tree.isRed) console.log(out + `(${tree.value})`);
+	else console.log(out + `[${tree.value}]`);
     
     prettyPrintTree(tree.right, depth + 1);
 }
