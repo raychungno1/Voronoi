@@ -1,5 +1,4 @@
 class Arc {
-	// constructor(l, r, f, el, er) {
 	constructor(f, el, er) {
 		// Tree
 		this.parent = null;
@@ -8,8 +7,6 @@ class Arc {
 		this.isRed = true;
 
 		// Doubly linked list
-		// this.left = l;
-		// this.right = r;
 		this.prev = null;
         this.next = null;
 

@@ -29,6 +29,16 @@ class Edge {
 		if (this.m == Infinity) return this.start.x;
 		return (y - this.q) / this.m;
 	}
+
+	draw(c) {
+        c.beginPath();
+        c.moveTo(this.start.x, this.start.y);
+        c.lineTo(this.end.x, this.end.y);
+        c.lineWidth = 3;
+        c.strokeStyle = "#17252a";
+        c.stroke();
+        return this;
+    }
 }
 
 export { Edge }

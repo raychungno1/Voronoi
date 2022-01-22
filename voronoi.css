@@ -5,10 +5,45 @@
 
 body {
     margin: 0;
-    background:#101A26;
-    height: 100vh;
+    background:#f0f0f0;
+}
+
+h1, h2, h3, p {
+    font-family: 'Lora', serif;
+    font-weight: 400;
+    color: #17252a;
+    margin: 0;
 }
 
 canvas {
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(222, 242, 241, 0.5);
+    box-shadow:inset 0px 0px 0px 3px #17252a;
+    cursor: crosshair;
+    margin-bottom: 0.5em;
+}
+
+.container {
+    width: 80%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.main {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    position: relative;
+}
+
+.main h1 {
+    font-size: 4rem;
+}
+
+.info {
+    font-weight: bold;
+    letter-spacing: .1em;
+    text-transform: uppercase;
 }
