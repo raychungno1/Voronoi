@@ -146,12 +146,12 @@ class RBT {
             }
 
             if (node.next) { // Compute the breakpoint between the current node & the next
-                breakpointLeft = RBT.computeBreakpoint(l, node.focus, node.next.focus);
+                breakpointRight = RBT.computeBreakpoint(l, node.focus, node.next.focus);
             }
 
             // Binary search for node based on the breakpoints
-            if (point.x < breakpointLeft && node.left) node = node.left;
-            else if (point.x > breakpointRight && node.right) node = node.right;
+            if (point.x < breakpointLeft) node = node.left;
+            else if (point.x > breakpointRight) node = node.right;
             else found = true;
         }
         return node;

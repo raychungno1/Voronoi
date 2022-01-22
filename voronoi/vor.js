@@ -5,12 +5,7 @@ import { Event } from "./event.js"
 import { MinHeap, RBT } from "../data-structs.js"
 
 class VoronoiDiagram {
-	/**
-	 * Creates an instance of the Voronoi diagram builder
-	 * @param {[Point]} points - List of Points objects p having x and y coordinate p.x and p.y
-	 * @param {float} width - Width of the canvas
-	 * @param {float} height - Height of the canvas
-	 */
+
 	constructor(points, width, height) {
 		this.point_list = points;
 		this.reset();
@@ -20,15 +15,11 @@ class VoronoiDiagram {
 
 	reset() {
 		this.event_list = null;
-		// this.beachline_root = null;
 		this.beachline = new RBT();
 		this.voronoi_vertex = [];
 		this.edges = [];
 	}
 
-	/**
-	 * Builds the Voronoi diagram computing the Voroni vertices and edges
-	 */
 	update() {
 		this.reset();
 		let points = [];
@@ -44,10 +35,6 @@ class VoronoiDiagram {
 		this.complete_segments(e.position);
 	}
 
-	/**
-	 * Handles the Point Events
-	 * @param {Point} p - a point object that must have coordinates p.x and p.y
-	 */
 	point_event(p) {
 		if (this.beachline.isEmpty()) {
 			this.beachline.setRoot(new Arc(p, null, null));
@@ -55,7 +42,7 @@ class VoronoiDiagram {
 		}
 
 		let q = this.beachline.locateArcAbove(p, p.y)
-
+		
 		// if(q === this.beachline_root && q.focus.y == p.y) xx = (q.focus.x + p.x)/2 // edge case when the two top sites have same y
 		let e_qp = new Edge(q.focus, p, p.x);
 		let e_pq = new Edge(p, q.focus, p.x);
@@ -77,10 +64,6 @@ class VoronoiDiagram {
 		this.edges.push(e_pq);
 	}
 
-	/**
-	 * Handles the circle event
-	 * @param {Event} e - Event type object
-	 */
 	circle_event(e) {
 		let arc = e.caller;
 		let p = e.position;
@@ -104,11 +87,6 @@ class VoronoiDiagram {
 		this.add_circle_event(p, arc.next);
 	}
 
-	/**
-	 * Tests if the arc event is valid and adds it into the queue
-	 * @param {Point} p - Current position of the sweepline
-	 * @param {Arc} arc - The Arc tested
-	 */
 	add_circle_event(p, arc) {
 		if (arc.prev && arc.next) {
 			let a = arc.prev.focus;
@@ -141,31 +119,6 @@ class VoronoiDiagram {
 		}
 	}
 
-	// Input: float, Point, Point
-	/**
-	 * Computes the intersection of two parabolas given the directrix
-	 * @param {float} y - position of the directrix (sweepline)
-	 * @param {Point} f1 - Focus of first parabola
-	 * @param {Point} f2 - Focus of second parabola
-	 * @returns	{float} Intersection x-coordinate
-	 */
-	parabola_intersection(y, p1, p2) {
-		let dy = p1.y - p2.y;
-		if (dy === 0) return (p1.x + p2.x) / 2;
-		let dx = p1.x - p2.x;
-		let p1Dist = p1.y - y; //Difference btw parabola 1 fy and directrix
-		let p2Dist = p2.y - y; //Difference btw parabola 2 fy and directrix
-
-		let numerator = (p2.x * p1Dist - p1.x * p2Dist) + Math.sqrt(p1Dist * p2Dist * (dx ** 2 + dy ** 2));
-		return numerator / dy;
-	}
-
-	/**
-	 * Computes the intersection point of two edges
-	 * @param {Edge} e1 - First edge
-	 * @param {Edge} e2 - Second edge
-	 * @returns {Point} Intersection point
-	 */
 	edge_intersection(e1, e2) {
 		if (e1.m == Infinity) return new Point(e1.start.x, e2.getY(e1.start.x));
 		else if (e2.m == Infinity)
@@ -179,20 +132,16 @@ class VoronoiDiagram {
 		}
 	}
 
-	/**
-	 * Completes the Voronoi edges taking into account the canvas sizes
-	 * @param {Point} last - last point extracted from the queue
-	 */
 	complete_segments(last) {
-		let r = this.beachline.root;
+		let r = this.beachline.getLeftmostArc();
 		let e, x, y;
 		// Complete edges attached to beachline
-		while (r.right) {
+		while (r.next) {
 			e = r.edge.right;
 			x = RBT.computeBreakpoint(
 				last.y * 1.1,
-				e.arc.prev,
-				e.arc.next
+				e.arc.left,
+				e.arc.right
 			); // Check parabola intersection assuming sweepline position equal to last event increased by 10%
 			y = e.getY(x);
 
@@ -218,7 +167,7 @@ class VoronoiDiagram {
 					e.end = this.edge_end(e, y);
 				}
 			}
-			r = r.right;
+			r = r.next;
 		}
 
 		let option;
@@ -247,11 +196,6 @@ class VoronoiDiagram {
 		}
 	}
 
-	/**
-	 * Computes the intersection point between an edge and the canvas bounding box
-	 * @param {Edge} e - Edge being completed
-	 * @param {float} y_lim - Either 0 or y limit of the canvas
-	 */
 	edge_end(e, y_lim) {
 		let x = Math.min(this.box_x, Math.max(0, e.getX(y_lim)));
 		let y = e.getY(x);
@@ -261,10 +205,6 @@ class VoronoiDiagram {
 		return p;
 	}
 
-	/**
-	 * Tests if a point is outside the canvas bounding box
-	 * @param {Point} p - Point tested
-	 */
 	point_outside(p) {
 		return p.x < 0 || p.x > this.box_x || p.y < 0 || p.y > this.box_y;
 	}

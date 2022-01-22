@@ -1,5 +1,5 @@
 import { Point } from "./point.js";
-import { Arc } from "./arc.js"
+import { Arc } from "./arc copy.js"
 import { Edge } from "./edge.js"
 import { Event } from "./event.js"
 import { MinHeap } from "../data-structs.js"
@@ -58,6 +58,7 @@ class VoronoiDiagram {
 				q = q.right;
 			}
 
+			console.log(q);
 			// if(q === this.beachline_root && q.focus.y == p.y) xx = (q.focus.x + p.x)/2 // edge case when the two top sites have same y
 			let e_qp = new Edge(q.focus, p, p.x);
 			let e_pq = new Edge(p, q.focus, p.x);

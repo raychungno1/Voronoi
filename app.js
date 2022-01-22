@@ -22,21 +22,9 @@ window.addEventListener("mousemove", function(event) {
     mouse.y = event.y;
 })
 
-// function init(c, circles, edges) {
-//     for (let i = 0; i < 10; i++) {
-//         let radius = 3;
-//         let x = (Math.random() * (canvas.width - 2*radius)) + radius;
-//         let y = (Math.random() * (canvas.height - (2*radius))) + radius;
-//         circles.push(new Circle(x, y, radius));//.draw(c));
-//         if (i) edges.push(new Line(circles[circles.length - 2], circles[circles.length - 1], radius));//.draw(c));
-//     }
-//     Line.drawLines(c, ...edges);
-//     Circle.drawCircles(c, ...circles);
-// }
-
 function init(points, width, height) {
     let radius = 3;
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 10; i++) {
         let x = (Math.random() * (width - 2*radius)) + radius;
         let y = (Math.random() * (height - (2*radius))) + radius;
         points.push(new Point(x, y));
@@ -48,6 +36,7 @@ function init(points, width, height) {
     
     // Edges of the Voronoi diagram
     let e = vor.edges;
+    
     // Vertices of the Voronoi diagram
     let v = vor.voronoi_vertex;
 
