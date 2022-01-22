@@ -455,25 +455,25 @@ class Node {
     }
 }
 
-export { MinHeap, RBT }
+export { MinHeap }
 
-// let rootNode = new Node(4);
-// let leftNode = new Node(5);
-// let rightNode = new Node(6);
-// let t = new RBT();
-// console.log(t.isEmpty())
-// t.printTree();
-// t.setRoot(rootNode);
-// console.log(t.isEmpty())
-// t.remove(rootNode);
-// console.log(t.isEmpty())
-// t.printTree();
-// t.insertAfter(rootNode, leftNode);
-// t.printTree();
-// t.insertAfter(leftNode, rightNode);
-// t.printTree();
-// t.replace(rootNode, new Node(7));
-// t.printTree();
+let rootNode = new Node(4);
+let leftNode = new Node(7);
+let rightNode = new Node(11);
+let leftLeft = new Node(2);
+let leftRight = new Node(6);
+let rightLeft = new Node(9);
+let rightRight = new Node(13);
+
+let t = new RBT();
+t.printTree();
+t.setRoot(rootNode);
+t.insertAfter(rootNode, leftNode);
+t.insertAfter(leftNode, rightNode);
+t.printTree();
+t.insertBefore(leftNode, leftLeft);
+t.insertAfter(leftNode, leftRight);
+t.printTree();
 // t.remove(rightNode);
 // t.printTree();
 // t.remove(rootNode);

@@ -1,19 +1,15 @@
 class Event {
-    constructor(isSiteEvent, siteOrPoint, arc = null, y = null) {
-        this.isSiteEvent = isSiteEvent
-        if (isSiteEvent) {
-            this.site = siteOrPoint;
-            this.y = this.site.point.y;
-        } else {
-            this.point = siteOrPoint;
-            this.arc = arc;
-            this.y = y;
-        }
-    }
+	constructor(type, position, caller, vertex) {
+		this.type = type;
+		this.caller = caller;
+		this.position = position;
+		this.vertex = vertex;
+		this.active = true;
+	}
 
-    lessThan(event) {
-        return this.y > event.y;
-    }
+	lessThan(event) {
+		return this.position.y < event.position.y;
+	}
 }
 
-export { Event };
+export { Event }
