@@ -457,23 +457,24 @@ class Node {
 
 export { MinHeap }
 
-let rootNode = new Node(4);
-let leftNode = new Node(7);
+let leftNode = new Node(4);
+let rootNode = new Node(7);
 let rightNode = new Node(11);
 let leftLeft = new Node(2);
 let leftRight = new Node(6);
-let rightLeft = new Node(9);
-let rightRight = new Node(13);
-
+let leftX3 = new Node (1);
 let t = new RBT();
 t.printTree();
-t.setRoot(rootNode);
-t.insertAfter(rootNode, leftNode);
-t.insertAfter(leftNode, rightNode);
+t.setRoot(leftNode);
+t.insertAfter(leftNode, rootNode);
+t.insertAfter(rootNode, rightNode);
 t.printTree();
 t.insertBefore(leftNode, leftLeft);
 t.insertAfter(leftNode, leftRight);
 t.printTree();
+t.insertAfter(leftLeft, leftX3);
+t.printTree();
+t.printDLL();
 // t.remove(rightNode);
 // t.printTree();
 // t.remove(rootNode);

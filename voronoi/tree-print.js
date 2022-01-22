@@ -24,9 +24,9 @@ function printSpaces(tree, depth) {
 		/* if parsing a left child w/ a left streak or a right child w/ a right streak */
 		if ((tree.parent.left === tree && lStreak) ||
 		    (tree.parent.right === tree && rStreak)) {
-			str += ' '; /* print space */
+			str = ' ' + str; /* print space */
 		} else {
-			str += '|'; /* print '|' */
+			str = '|' + str; /* print '|' */
 		}
 
 		/* updating streaks */
@@ -36,7 +36,7 @@ function printSpaces(tree, depth) {
 			lStreak = 0, rStreak = 1;
 		}
 
-		str += "  "; /* pad two additional spaces per level */
+		str = "  " + str; /* pad two additional spaces per level */
 		tree = tree.parent; /* move to parent node */
 	}
 
