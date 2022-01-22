@@ -8,6 +8,6 @@ The Voronoi Diagram was generated using Fortune's Algorithm, with my implementat
 By utilizing Heap and Red Black Tree data structures, we are able to calculate the Voronoi Diagram in `O(nlog(n))` time.
 
 ### Other Useful Sources
-[Voronoi Diagrams With Fortune's Algorithm](http://www.bitbanging.space/posts/voronoi-diagram-with-fortunes-algorithm)
-[Fortunes Algorithm: An Intuitive Explanation](https://jacquesheunis.com/post/fortunes-algorithm/)
-[Fortune's Algorithm: The Details](https://pvigier.github.io/2018/11/18/fortune-algorithm-details.html)
+* [Voronoi Diagrams With Fortune's Algorithm](http://www.bitbanging.space/posts/voronoi-diagram-with-fortunes-algorithm)
+* [Fortunes Algorithm: An Intuitive Explanation](https://jacquesheunis.com/post/fortunes-algorithm/)
+* [Fortune's Algorithm: The Details](https://pvigier.github.io/2018/11/18/fortune-algorithm-details.html)
