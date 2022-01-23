@@ -1,6 +1,6 @@
 # Voronoi Diagram Generator
 
-This is a simple Voronoi Diagram Generator created for my [ML & AI Visualizer Project](https://github.com/raychungno1/ML-Visualizer). View the diagram by opening the `index.html` file.
+This is a simple Voronoi Diagram Generator created for my [ML & AI Visualizer Project](https://github.com/raychungno1/ML-Visualizer). View the diagram [here](https://raychungno1.github.io/Voronoi/) or by opening the `index.html` file.
 
 ### Implementation Details
 The Voronoi Diagram was generated using Fortune's Algorithm, with my implementation heavily based off of [this blog post](http://www.bitbanging.space/posts/voronoi-diagram-with-fortunes-algorithm).
